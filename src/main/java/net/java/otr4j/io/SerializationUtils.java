@@ -15,11 +15,12 @@
  */
 package net.java.otr4j.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import net.java.otr4j.io.messages.*;
+import net.java.otr4j.session.Session.OTRv;
+import org.bouncycastle.util.encoders.Base64;
+
+import javax.crypto.interfaces.DHPublicKey;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -27,25 +28,6 @@ import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.crypto.interfaces.DHPublicKey;
-
-import org.bouncycastle.util.encoders.Base64;
-
-import net.java.otr4j.io.messages.AbstractEncodedMessage;
-import net.java.otr4j.io.messages.AbstractMessage;
-import net.java.otr4j.io.messages.DHCommitMessage;
-import net.java.otr4j.io.messages.DHKeyMessage;
-import net.java.otr4j.io.messages.DataMessage;
-import net.java.otr4j.io.messages.ErrorMessage;
-import net.java.otr4j.io.messages.MysteriousT;
-import net.java.otr4j.io.messages.PlainTextMessage;
-import net.java.otr4j.io.messages.QueryMessage;
-import net.java.otr4j.io.messages.RevealSignatureMessage;
-import net.java.otr4j.io.messages.SignatureM;
-import net.java.otr4j.io.messages.SignatureMessage;
-import net.java.otr4j.io.messages.SignatureX;
-import net.java.otr4j.session.Session.OTRv;
 
 /**
  * @author George Politis
@@ -254,6 +236,11 @@ public class SerializationUtils {
 
 	static final Pattern patternWhitespace = Pattern
 			.compile("( \\t  \\t\\t\\t\\t \\t \\t \\t  )( \\t \\t  \\t )?(  \\t\\t  \\t )?(  \\t\\t  \\t\\t)?");
+
+	public static int getMessageType(String s) throws IOException {
+		//TODO: don't read full message
+		return toMessage(s).messageType;
+	}
 
 	public static AbstractMessage toMessage(String s) throws IOException {
 		if (s == null || s.length() == 0)
