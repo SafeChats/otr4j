@@ -15,12 +15,11 @@
  */
 package net.java.otr4j.session;
 
-import java.math.BigInteger;
-import java.security.KeyPair;
+import net.java.otr4j.OtrException;
 
 import javax.crypto.interfaces.DHPublicKey;
-
-import net.java.otr4j.OtrException;
+import java.math.BigInteger;
+import java.security.KeyPair;
 
 /**
  * @author George Politis
@@ -54,6 +53,8 @@ public interface SessionKeys {
 	public abstract byte[] getSendingMACKey() throws OtrException;
 
 	public abstract byte[] getReceivingMACKey() throws OtrException;
+
+	public abstract byte[] getExtraSymmetricKey() throws OtrException;
 
 	public abstract void setS(BigInteger s);
 

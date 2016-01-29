@@ -15,6 +15,12 @@
  */
 package net.java.otr4j.session;
 
+import net.java.otr4j.OtrEngineHost;
+import net.java.otr4j.OtrException;
+import net.java.otr4j.OtrPolicy;
+import net.java.otr4j.crypto.OtrCryptoEngineImpl;
+import net.java.otr4j.crypto.OtrCryptoException;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -22,12 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.logging.Logger;
-
-import net.java.otr4j.OtrEngineHost;
-import net.java.otr4j.OtrException;
-import net.java.otr4j.OtrPolicy;
-import net.java.otr4j.crypto.OtrCryptoEngineImpl;
-import net.java.otr4j.crypto.OtrCryptoException;
 
 /**
  * @author George Politis
@@ -302,6 +302,10 @@ public class DummyClient {
 
 		public void multipleInstancesDetected(SessionID sessionID) {
 
+		}
+
+		@Override
+		public void symmetricKeyReceived(SessionID sessionID, byte[] symKey, byte[] content) {
 		}
 
 		public String getFallbackMessage() {

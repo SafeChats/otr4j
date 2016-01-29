@@ -57,6 +57,11 @@ public interface Session {
 	public abstract String[] transformSending(String content)
 			throws OtrException;
 
+	public abstract String[] transformSending(String content, List<TLV> tlvs, /* out */ byte[] symKey)
+			throws OtrException;
+
+	public abstract String[] sendSymKey(byte[] content, /* out */ byte[] symKey) throws OtrException;
+
 	public abstract void startSession() throws OtrException;
 
 	public abstract void endSession() throws OtrException;

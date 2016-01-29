@@ -6,6 +6,9 @@ public class TLV {
     /* The sender has thrown away his OTR session keys with you */
     public static final int DISCONNECTED=0x0001;
 
+    /* The sender want to use "extra" symmetric key */
+	public static final int SYMKEY = 0x0008;
+
     /* The message contains a step in the Socialist Millionaires' Protocol. */ 
     public static final int SMP1=0x0002;
     public static final int SMP2=0x0003;

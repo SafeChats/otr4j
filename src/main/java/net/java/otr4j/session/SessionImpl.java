@@ -621,6 +621,9 @@ public class SessionImpl implements Session {
 
 			logger.finest("Decrypted message: \"" + decryptedMsgContent + "\"");
 
+			// Calculate extra symmetric key.
+            byte[] symKey = matchingKeys.getExtraSymmetricKey();
+
 			// Rotate keys if necessary.
 			SessionKeys mostRecent = this.getMostRecentSessionKeys();
 			if (mostRecent.getLocalKeyID() == receipientKeyID)
@@ -664,6 +667,11 @@ public class SessionImpl implements Session {
 					case TLV.DISCONNECTED:
 						this.setSessionStatus(SessionStatus.FINISHED);
 						return null;
+
+                    case TLV.SYMKEY:
+                        getHost().symmetricKeyReceived(getSessionID(), symKey, tlv.getValue());
+                        break;
+
 					default:
 						if (otrSm.doProcessTlv(tlv))
 							return null;
@@ -813,7 +821,17 @@ public class SessionImpl implements Session {
 		return this.transformSending(msgText, null);
 	}
 
-	public String[] transformSending(String msgText, List<TLV> tlvs)
+    public String[] transformSending(String msgText, List<TLV> tlvs)
+            throws OtrException {
+        return transformSending(msgText, tlvs, null);
+    }
+
+    public String[] sendSymKey(byte[] content, /* out */ byte[] symKey) throws OtrException {
+        TLV tlv = new TLV(TLV.SYMKEY, content);
+        return transformSending("", Collections.singletonList(tlv), symKey);
+    }
+
+	public String[] transformSending(String msgText, List<TLV> tlvs, /* out */ byte[] symKey)
 			throws OtrException {
 
 		if (isMasterSession && this.slaveSessions.isSelected() && getProtocolVersion() == OTRv.THREE) {
@@ -898,6 +916,12 @@ public class SessionImpl implements Session {
 							+ senderKeyID + ", " + receipientKeyID + ")");
 			byte[] encryptedMsg = otrCryptoEngine.aesEncrypt(encryptionKeys
 					.getSendingAESKey(), ctr, data);
+
+            // Calculate extra symmetric key
+            if (symKey != null && symKey.length >= OtrCryptoEngine.SHA256_HMAC_KEY_BYTE_LENGTH) {
+                byte[] key = encryptionKeys.getExtraSymmetricKey();
+                System.arraycopy(key, 0, symKey, 0, OtrCryptoEngine.SHA256_HMAC_KEY_BYTE_LENGTH);
+            }
 
 			// Get most recent keys to get the next D-H public key.
 			SessionKeys mostRecentKeys = this.getMostRecentSessionKeys();

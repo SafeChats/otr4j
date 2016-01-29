@@ -15,11 +15,11 @@
  */
 package net.java.otr4j;
 
-import java.security.KeyPair;
-
 import net.java.otr4j.session.FragmenterInstructions;
 import net.java.otr4j.session.InstanceTag;
 import net.java.otr4j.session.SessionID;
+
+import java.security.KeyPair;
 
 /**
  * 
@@ -88,4 +88,6 @@ public abstract interface OtrEngineHost {
 	public abstract void messageFromAnotherInstanceReceived(SessionID sessionID);
 
 	public abstract void multipleInstancesDetected(SessionID sessionID);
+
+	public abstract void symmetricKeyReceived(SessionID sessionID, byte[] symKey, byte[] content);
 }

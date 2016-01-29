@@ -15,18 +15,18 @@
  */
 package net.java.otr4j.session;
 
+import net.java.otr4j.OtrException;
+import net.java.otr4j.crypto.OtrCryptoEngine;
+import net.java.otr4j.crypto.OtrCryptoEngineImpl;
+import net.java.otr4j.io.SerializationUtils;
+
+import javax.crypto.interfaces.DHPublicKey;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.KeyPair;
 import java.util.Arrays;
 import java.util.logging.Logger;
-
-import javax.crypto.interfaces.DHPublicKey;
-
-import net.java.otr4j.OtrException;
-import net.java.otr4j.crypto.OtrCryptoEngine;
-import net.java.otr4j.crypto.OtrCryptoEngineImpl;
-import net.java.otr4j.io.SerializationUtils;
 
 /**
  * 
@@ -113,20 +113,28 @@ class SessionKeysImpl implements SessionKeys {
 
 	}
 
+    private byte[] getSecBytes(byte first) throws OtrException {
+        byte[] secbytes;
+        try {
+            secbytes = SerializationUtils.writeMpi(getS());
+        } catch (IOException e) {
+            throw new OtrException(e);
+        }
+
+        ByteBuffer buff = ByteBuffer.allocate(secbytes.length + 1);
+        buff.put(first);
+        buff.put(secbytes);
+        return buff.array();
+    }
+
 	private byte[] h1(byte b) throws OtrException {
+        byte[] secBytes = getSecBytes(b);
+        return new OtrCryptoEngineImpl().sha1Hash(secBytes);
+	}
 
-		try {
-			byte[] secbytes = SerializationUtils.writeMpi(getS());
-
-			int len = secbytes.length + 1;
-			ByteBuffer buff = ByteBuffer.allocate(len);
-			buff.put(b);
-			buff.put(secbytes);
-			byte[] result = new OtrCryptoEngineImpl().sha1Hash(buff.array());
-			return result;
-		} catch (Exception e) {
-			throw new OtrException(e);
-		}
+	private byte[] h2(byte b) throws OtrException {
+		byte[] secBytes = getSecBytes(b);
+		return new OtrCryptoEngineImpl().sha256Hash(secBytes);
 	}
 
 	public byte[] getSendingAESKey() throws OtrException {
@@ -183,6 +191,10 @@ class SessionKeysImpl implements SessionKeys {
 		}
 		return receivingMACKey;
 	}
+
+    public byte[] getExtraSymmetricKey() throws OtrException {
+        return h2((byte)0xFF);
+    }
 
 	private BigInteger getS() throws OtrException {
 		if (s == null) {
