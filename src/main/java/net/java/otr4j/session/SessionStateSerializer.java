@@ -276,10 +276,15 @@ class SessionStateSerializer {
         private static final String PROP_REMOTE_KEY = "remoteKey";
         private static final String PROP_REMOTE_KEY_ID = "remoteKeyId";
         private static final String PROP_IS_USED_MAC_KEY = "isUsedMacKey";
+        private static final String PROP_SENDING_CTR = "sendingCtr";
+        private static final String PROP_RECEIVING_CTR = "receivingCtr";
 
         @Override
         public JsonElement serialize(SessionKeys sessionKeys, Type type, JsonSerializationContext context) {
             JsonObject json = new JsonObject();
+
+            json.add(PROP_SENDING_CTR, context.serialize(sessionKeys.getSendingCtr()));
+            json.add(PROP_RECEIVING_CTR, context.serialize(sessionKeys.getReceivingCtr()));
 
             json.add(PROP_LOCAL_KEY, context.serialize(sessionKeys.getLocalPair()));
             json.addProperty(PROP_LOCAL_KEY_ID, sessionKeys.getLocalKeyID());
@@ -296,19 +301,30 @@ class SessionStateSerializer {
         public SessionKeys deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context)
                 throws JsonParseException {
             JsonObject json = jsonElement.getAsJsonObject();
+            SessionKeys keys = new SessionKeysImpl(0, 0);
 
             KeyPair localKey = context.deserialize(json.get(PROP_LOCAL_KEY), KeyPair.class);
             int localKeyId = json.getAsJsonPrimitive(PROP_LOCAL_KEY_ID).getAsInt();
+            keys.setLocalPair(localKey, localKeyId);
 
             DHPublicKey remoteKey = context.deserialize(json.get(PROP_REMOTE_KEY), DHPublicKey.class);
             int remoteKeyId = json.getAsJsonPrimitive(PROP_REMOTE_KEY_ID).getAsInt();
+            keys.setRemoteDHPublicKey(remoteKey, remoteKeyId);
 
             boolean isUsedMacKey = json.getAsJsonPrimitive(PROP_IS_USED_MAC_KEY).getAsBoolean();
-
-            SessionKeys keys = new SessionKeysImpl(0, 0);
-            keys.setLocalPair(localKey, localKeyId);
-            keys.setRemoteDHPublicKey(remoteKey, remoteKeyId);
             keys.setIsUsedReceivingMACKey(isUsedMacKey);
+
+            JsonElement receivingCtrElement = json.get(PROP_RECEIVING_CTR);
+            if (receivingCtrElement != null) {
+                byte[] receivingCtr = context.deserialize(receivingCtrElement, byte[].class);
+                keys.setReceivingCtr(receivingCtr);
+            }
+
+            JsonElement sendingCtrElement = json.get(PROP_SENDING_CTR);
+            if (sendingCtrElement != null) {
+                byte[] sendingCtr = context.deserialize(sendingCtrElement, byte[].class);
+                keys.setSendingCtr(sendingCtr);
+            }
 
             return keys;
         }

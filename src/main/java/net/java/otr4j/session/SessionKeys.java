@@ -42,6 +42,8 @@ public interface SessionKeys {
 
 	public abstract byte[] getSendingCtr();
 
+	public abstract void setSendingCtr(byte[] ctr);
+
 	public abstract byte[] getReceivingCtr();
 
 	public abstract void setReceivingCtr(byte[] ctr);

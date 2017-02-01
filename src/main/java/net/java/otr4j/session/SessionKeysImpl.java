@@ -88,6 +88,10 @@ class SessionKeysImpl implements SessionKeys {
 		return sendingCtr;
 	}
 
+	public void setSendingCtr(byte[] ctr) {
+		System.arraycopy(ctr, 0, sendingCtr, 0, ctr.length);
+	}
+
 	public byte[] getReceivingCtr() {
 		return receivingCtr;
 	}
